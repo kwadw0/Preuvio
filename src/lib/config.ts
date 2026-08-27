@@ -18,8 +18,21 @@ function getEnv(key: string, fallback?: string): string | undefined {
   return v ?? fallback
 }
 
+function normalizeBaseUrl(url: string): string {
+  if (!url) return ""
+  return url.replace(/\/+$/, "")
+}
+
+function resolveApiBaseUrl(): string {
+  const raw = getEnv("VITE_API_BASE_URL", undefined)
+  // Empty string in .env means "use same-origin via Vite proxy" — do not fallback
+  if (raw === "") return ""
+  if (raw !== undefined) return normalizeBaseUrl(raw)
+  return "https://preuvio-api.onrender.com"
+}
+
 export const config: AppConfig = {
-  apiBaseUrl: getEnv("VITE_API_BASE_URL", "https://api.preuvio.com/v1")!,
+  apiBaseUrl: resolveApiBaseUrl(),
   appUrl: getEnv("VITE_APP_URL", "https://app.preuvio.com")!,
   env: (getEnv("MODE", "development") as AppConfig["env"]) ?? "development",
 }

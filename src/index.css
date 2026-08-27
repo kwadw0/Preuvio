@@ -1,35 +1,66 @@
 @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap');
 
 :root {
-  /* Palette - Preuvio: evidence / proof */
-  --ink: #0B0F1A;
-  --ink-2: #1A2233;
-  --muted: #5B6577;
-  --muted-2: #8A94A8;
-  --line: #E6E8EE;
-  --line-strong: #D5D9E2;
-  --bg: #FFFFFF;
-  --bg-soft: #F6F7F9;
-  --bg-softer: #F0F2F6;
-  --nav-bg: rgba(255,255,255,0.85);
-  --accent: #4F46E5;
-  --accent-2: #06B6D4;
-  --accent-ink: #FFFFFF;
-  --accent-hover: #4338CA;
-  --success: #059669;
-  --warn: #D97706;
-  --danger: #DC2626;
+  /* Preuvio — Premium compliance palette */
+  /* Core */
+  --forest: #173B36;
+  --forest-2: #1E4A44;
+  --verdant: #2F7D68;
+  --verdant-hover: #25695A;
+  --sand: #E8DED0;
+  --sand-soft: #F1ECE4;
+  --copper: #B97852;
+  --copper-hover: #A66745;
+  --ivory: #FAF9F6;
+  --surface: #FFFFFF;
+  --graphite: #202522;
+  --slate: #6B746F;
+  --slate-2: #9DA8A2;
+  --warm-gray: #E4E1DB;
+  --warm-gray-strong: #D5D0C6;
+
+  /* Semantic — mapped to core for consistency */
+  --success: #2F7D68;
+  --warn: #C58A3A;
+  --danger: #B94A48;
+  --info: #657C86;
+
+  /* Legacy tokens (keep API stable) */
+  --ink: var(--forest);
+  --ink-2: var(--forest-2);
+  --muted: var(--slate);
+  --muted-2: var(--slate-2);
+  --line: var(--warm-gray);
+  --line-strong: var(--warm-gray-strong);
+  --bg: var(--surface);
+  --bg-soft: var(--ivory);
+  --bg-softer: var(--sand-soft);
+  --bg-warm: var(--sand);
+  --nav-bg: rgba(250, 249, 246, 0.92);
+  --accent: var(--verdant);
+  --accent-2: var(--copper);
+  --accent-ink: var(--surface);
+  --accent-hover: var(--verdant-hover);
   --radius-xl: 24px;
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
-  --shadow-sm: 0 1px 2px rgba(16,24,40,0.06), 0 1px 3px rgba(16,24,40,0.08);
-  --shadow-md: 0 4px 16px rgba(16,24,40,0.08), 0 8px 24px rgba(16,24,40,0.08);
-  --shadow-lg: 0 12px 32px rgba(16,24,40,0.12), 0 24px 48px rgba(16,24,40,0.12);
+  --radius-full: 999px;
+  --hairline: var(--warm-gray);
+  --hairline-strong: var(--warm-gray-strong);
+  --ash: var(--slate-2);
+  --shadow-sm: 0 1px 2px rgba(32, 37, 34, 0.06), 0 1px 3px rgba(32, 37, 34, 0.07);
+  --shadow-md: 0 4px 16px rgba(32, 37, 34, 0.08), 0 8px 24px rgba(32, 37, 34, 0.07);
+  --shadow-lg: 0 12px 32px rgba(32, 37, 34, 0.11), 0 24px 48px rgba(32, 37, 34, 0.09);
   --max-w: 1200px;
   --sans: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   --display: 'Instrument Sans', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Signature gradients (use sparingly) */
+  --grad-verified: linear-gradient(135deg, #173B36 0%, #2F7D68 55%, #6FA58F 100%);
+  --grad-evidence: linear-gradient(135deg, #FAF9F6 0%, #F1ECE4 50%, #E8DED0 100%);
+  --grad-assurance: linear-gradient(120deg, #173B36 0%, #315F55 45%, #B97852 100%);
 }
 
 * { box-sizing: border-box; }
@@ -37,8 +68,8 @@ html { scroll-behavior: smooth; }
 html, body { margin: 0; padding: 0; }
 body {
   font-family: var(--sans);
-  color: var(--ink);
-  background: var(--bg);
+  color: var(--graphite);
+  background: var(--ivory);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -55,7 +86,7 @@ button { font: inherit; }
 
 /* Focus */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--verdant);
   outline-offset: 2px;
 }
 
@@ -67,7 +98,7 @@ button { font: inherit; }
 @media (max-width: 640px) {
   .container { width: min(var(--max-w), calc(100% - 24px)); }
 }
-.muted { color: var(--muted); }
+.muted { color: var(--slate); }
 .kicker {
   display: inline-flex;
   align-items: center;
@@ -76,9 +107,9 @@ button { font: inherit; }
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--accent);
-  background: #EEF2FF;
-  border: 1px solid #E0E7FF;
+  color: var(--verdant);
+  background: var(--ivory);
+  border: 1px solid var(--warm-gray);
   padding: 6px 10px;
   border-radius: 999px;
 }

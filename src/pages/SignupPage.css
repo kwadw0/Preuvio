@@ -1,0 +1,292 @@
+/* Auth — premium warm, Deep Forest + Verdant */
+.signup {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 100svh;
+  background: var(--surface);
+}
+@media (max-width: 900px) {
+  .signup { grid-template-columns: 1fr; }
+}
+
+/* Left panel — Soft Sand with subtle evidence gradient */
+.signup__left {
+  background: var(--grad-evidence);
+  border-right: 1px solid var(--warm-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+@media (max-width: 900px) {
+  .signup__left {
+    display: none;
+  }
+}
+.signup__left-inner {
+  max-width: 440px;
+}
+.signup__left .brand {
+  margin-bottom: 40px;
+  color: var(--forest);
+}
+.signup__left .brand__mark {
+  background: var(--forest); color: white;
+}
+.signup__headline {
+  font-family: var(--display);
+  font-size: clamp(32px, 4vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  color: var(--graphite);
+  margin: 0 0 14px;
+}
+.signup__tagline {
+  font-size: 15px;
+  color: var(--slate);
+  line-height: 1.6;
+  margin: 0 0 32px;
+}
+.signup__benefits {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid var(--warm-gray);
+  padding-top: 24px;
+}
+.signup__benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--graphite);
+  line-height: 1.5;
+}
+.signup__benefits li::before {
+  content: "[+]";
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--verdant);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.signup__benefit-dot { display: none; }
+
+/* Right panel — form */
+.signup__right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  background: var(--surface);
+}
+@media (max-width: 900px) {
+  .signup__right {
+    padding: 32px 20px;
+    min-height: 100svh;
+  }
+}
+.signup__form-wrap {
+  width: 100%;
+  max-width: 380px;
+}
+.signup__form-header {
+  margin-bottom: 28px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--warm-gray);
+}
+.signup__form-header h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: var(--graphite);
+}
+.signup__form-header p {
+  font-size: 13px;
+  color: var(--slate);
+  margin: 0;
+  font-family: var(--mono);
+}
+
+/* Form layout */
+.signup__form {
+  display: grid;
+  gap: 16px;
+}
+.signup__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 480px) {
+  .signup__row { grid-template-columns: 1fr; }
+}
+
+/* Fields — warm soft surface, verdant focus */
+.signup__field {
+  display: grid;
+  gap: 6px;
+}
+.signup__field label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--graphite);
+  letter-spacing: 0.02em;
+  font-family: var(--mono);
+  text-transform: uppercase;
+}
+.signup__field input {
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--warm-gray);
+  border-radius: var(--radius-sm);
+  background: var(--ivory);
+  color: var(--graphite);
+  outline: none;
+  height: 40px;
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+.signup__field input::placeholder {
+  color: var(--slate-2);
+}
+.signup__field input:focus {
+  background: var(--surface);
+  border-color: var(--verdant);
+  box-shadow: 0 0 0 3px rgba(47,125,104,0.12);
+}
+.signup__input--error {
+  border-color: var(--danger) !important;
+  background: var(--surface) !important;
+}
+
+/* Errors */
+.signup__error {
+  font-size: 12px;
+  color: var(--danger);
+  font-weight: 500;
+  font-family: var(--mono);
+}
+
+/* Password strength — verdant/forest */
+.signup__strength {
+  display: grid;
+  gap: 8px;
+  margin-top: 2px;
+}
+.signup__strength-bar {
+  height: 4px;
+  background: var(--warm-gray);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+.signup__strength-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width .25s ease, background .25s ease;
+}
+.signup__rules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+}
+@media (max-width: 480px) {
+  .signup__rules { grid-template-columns: 1fr; }
+}
+.signup__rule {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--slate-2);
+  font-family: var(--mono);
+}
+.signup__rule--pass {
+  color: var(--forest);
+}
+.signup__rule-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: var(--radius-full);
+  background: var(--warm-gray-strong);
+  flex-shrink: 0;
+}
+.signup__rule--pass .signup__rule-dot {
+  background: var(--verdant);
+}
+
+/* Submit — Deep Forest primary */
+.signup__submit {
+  margin-top: 4px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  height: 40px;
+  background: var(--forest);
+  border-color: var(--forest);
+  color: white;
+}
+.signup__submit:hover:not(:disabled) {
+  background: var(--forest-2);
+}
+.signup__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Footer link */
+.signup__footer {
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--slate);
+  text-align: center;
+  font-family: var(--mono);
+  border-top: 1px solid var(--warm-gray);
+  padding-top: 16px;
+}
+.signup__footer a {
+  color: var(--verdant);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.signup__footer a:hover {
+  color: var(--forest);
+}
+
+/* Success state */
+.signup__card--success {
+  text-align: center;
+  max-width: 420px;
+  padding: 48px 32px;
+}
+.signup__card--success h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  margin: 16px 0 8px;
+  font-weight: 700;
+  color: var(--graphite);
+}
+.signup__card--success p {
+  font-size: 13px;
+  color: var(--slate);
+  line-height: 1.6;
+  font-family: var(--mono);
+}
+.signup__success-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  background: var(--grad-verified);
+  color: var(--surface);
+  display: inline-grid;
+  place-items: center;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--mono);
+}

@@ -1,0 +1,96 @@
+/* Organization page — premium warm card */
+.org-card {
+  background: var(--surface);
+  border: 1px solid var(--warm-gray);
+  border-radius: 14px;
+  padding: 24px;
+  display: grid;
+  gap: 20px;
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+}
+.org-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--grad-verified);
+  opacity: 1;
+}
+.org-card__header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.org-card__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--grad-verified);
+  color: white;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(23,59,54,.18);
+}
+.org-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.org-card__title-row h2 {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1;
+  color: var(--graphite);
+}
+.org-card__desc {
+  font-size: 14px;
+  color: var(--slate);
+  max-width: 64ch;
+  margin: 0;
+  line-height: 1.6;
+}
+.org-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--warm-gray);
+}
+.org-card__field {
+  display: grid;
+  gap: 6px;
+}
+.org-card__label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--slate-2);
+}
+.org-card__value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--graphite);
+}
+.org-card__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--verdant);
+  text-decoration: none;
+  transition: opacity .15s ease;
+}
+.org-card__link:hover { color: var(--forest); opacity: .9; }
+.org-card__link svg { flex-shrink: 0; }
+@media (max-width: 640px) {
+  .org-card__grid { grid-template-columns: 1fr 1fr; }
+  .org-card__field--wide { grid-column: span 2; }
+}

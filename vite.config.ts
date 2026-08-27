@@ -8,4 +8,15 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  server: {
+    proxy: {
+      // Avoid CORS preflight 405 in dev — browser -> Vite (same origin) -> Render
+      // Use VITE_API_BASE_URL="" or "/api" in dev to hit this proxy.
+      "/api": {
+        target: "https://preuvio-api.onrender.com",
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 })
