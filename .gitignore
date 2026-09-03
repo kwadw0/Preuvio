@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+# graphify - generated knowledge graph, ignore
+graphify-out/
+.graphify/
+graphify/

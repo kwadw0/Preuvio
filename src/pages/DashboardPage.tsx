@@ -112,65 +112,8 @@ function DashboardPage() {
   }
 
   return (
-    <div className="dash">
-      {/* Rail */}
-      <aside className="dash__rail" aria-label="Primary">
-        <div className="dash__rail-top">
-          <span className="dash__logo" aria-hidden>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 3l7 4v5c0 5-3.5 7.5-7 8-3.5-.5-7-3-7-8V7l7-4z" />
-              <path d="M9 12l2 2 4-4" />
-            </svg>
-          </span>
-          <span className="dash__brand">
-            Preuvio
-          </span>
-        </div>
-
-        <nav className="dash__nav">
-          <Link to="/dashboard" className="is-active">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
-            Overview
-          </Link>
-          <button type="button" onClick={() => setActiveTab("all")}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M12 3v6h6"/></svg>
-            Forms<span className="count">{forms.filter(f=>f.status==="active").length}</span>
-          </button>
-          <button type="button" onClick={() => setActiveTab("public")}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M16 8l-8 8M8 8l8 8" opacity=".0"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v15H6.5A2.5 2.5 0 0 1 4 14.5V4.5A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            Templates<span className="count">{forms.filter(f=>f.visibility==="public").length}</span>
-          </button>
-          <Link to="/dashboard" onClick={(e)=>{e.preventDefault(); document.getElementById("partners")?.scrollIntoView({behavior:"smooth"})}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Partners<span className="count">{partners.length}</span>
-          </Link>
-          <button type="button">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M9 12h6"/></svg>
-            Proof vault
-          </button>
-          <Link to="/">
-
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-            Help
-          </Link>
-        </nav>
-
-        <div className="dash__rail-bottom">
-          <Link to="/profile" className="dash__user" aria-label="View profile">
-            <img src="https://i.pravatar.cc/100?img=12" alt="" />
-            <div>
-              <strong>Ada Lovelace</strong>
-              <span>ada@preuvio.com • {config.apiBaseUrl.replace("https://","")}</span>
-            </div>
-          </Link>
-          <button className="btn btn--ghost" style={{ width:"100%", justifyContent:"center"}} onClick={handleSignOut}>Sign out</button>
-        </div>
-      </aside>
-
-      {/* Main column */}
-      <div style={{ minWidth:0, display:"flex", flexDirection:"column"}}>
-        {/* Top bar */}
-        <header className="dash__top">
+    <>
+      <header className="dash__top">
           <button className="dash__icon-btn" style={{ display:"grid"}} aria-label="Toggle menu" onClick={()=>setMobileNav(v=>!v)}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               {mobileNav ? <path d="M18 6L6 18M6 6l12 12"/> : <><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></>}
@@ -193,7 +136,8 @@ function DashboardPage() {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 8a6 6 0 0 1 12 0c0 7-6 9-6 9s-6-2-6-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
             </button>
             <Link to="/" className="btn btn--ghost" style={{ padding:"7px 12px"}}>View site</Link>
-            <button className="btn btn--primary" onClick={()=>setShowCreate("form")} style={{ padding:"7px 12px"}}>Create form</button>
+            <Link to="/templates" className="btn btn--ghost" style={{ padding:"7px 12px"}}>Templates</Link>
+            <Link to="/forms" className="btn btn--primary" style={{ padding:"7px 12px"}}>Forms</Link>
           </div>
         </header>
 
@@ -209,9 +153,14 @@ function DashboardPage() {
         <main className="dash__main">
           {/* Ledger header — thesis */}
           <div className="dash__ledger">
+            <div className="dash__ledger-left">
+              <span className="dash__ledger-kicker"><i /> Dossiers • evidence desk</span>
+              <h1 style={{ fontSize: 22, margin: "8px 0 8px" }}>Evidence desk</h1>
+              <p>Build reusable blueprints, clone to org forms, collect proof — all rendered by the same &lt;FormRenderer /&gt;. Draft → Active → Archived.</p>
+            </div>
             <div className="dash__ledger-actions">
-              <button className="btn btn--ghost" onClick={()=>setShowCreate("template")}>Create template</button>
-              <button className="btn btn--primary" onClick={()=>setShowCreate("form")}>Create form →</button>
+              <Link to="/templates" className="btn btn--ghost">Browse templates</Link>
+              <Link to="/forms" className="btn btn--primary">Manage forms →</Link>
             </div>
           </div>
 
@@ -293,10 +242,13 @@ function DashboardPage() {
           <section id="partners" className="dash__card" aria-labelledby="partners-title">
             <div className="dash__card-head">
               <h2 id="partners-title">Partners & requests <em>{filteredPartners.length} of {partners.length}</em></h2>
-              <div className="filter-pills">
-                {(["all","pending","submitted","approved","expired"] as const).map((s) => (
-                  <button key={s} className={filter===s?"is-active":""} onClick={()=>setFilter(s as any)}>{s === "all" ? "All" : s[0].toUpperCase()+s.slice(1)}</button>
-                ))}
+              <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                <div className="filter-pills">
+                  {(["all","pending","submitted","approved","expired"] as const).map((s) => (
+                    <button key={s} className={filter===s?"is-active":""} onClick={()=>setFilter(s as any)}>{s === "all" ? "All" : s[0].toUpperCase()+s.slice(1)}</button>
+                  ))}
+                </div>
+                <Link to="/partners" className="btn btn--ghost btn--sm">View all →</Link>
               </div>
             </div>
 
@@ -392,7 +344,6 @@ function DashboardPage() {
 
           <p style={{ fontFamily:"var(--mono)", fontSize:11, color:"var(--muted-2)", textAlign:"center", margin:"6px 0 0"}}>Preuvio keeps every version, comment, and approval for audit. No spreadsheet needed.</p>
         </main>
-      </div>
 
       {/* Create modal */}
       {showCreate && (
@@ -454,7 +405,7 @@ function DashboardPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 
