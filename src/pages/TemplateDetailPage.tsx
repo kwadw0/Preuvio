@@ -99,8 +99,8 @@ export default function TemplateDetailPage() {
     if (!id) return
     setSaveState("saving")
     try {
-      const p = payload as unknown as { key: string; label: string; field_type: string; is_required?: boolean; sort_order?: number; placeholder?: string; description?: string; options?: unknown; validation?: unknown }
-      await api.createTemplateField(id, { section_id: sectionId, key: p.key, label: p.label, field_type: p.field_type as never, is_required: p.is_required, sort_order: p.sort_order, placeholder: p.placeholder, description: p.description, options: p.options, validation: p.validation })
+      const p = payload as unknown as { label: string; field_type: string; is_required?: boolean; sort_order?: number; placeholder?: string; description?: string; options?: unknown; validation?: unknown }
+      await api.createTemplateField(id, { section_id: sectionId, label: p.label, field_type: p.field_type as never, is_required: p.is_required, sort_order: p.sort_order, placeholder: p.placeholder, description: p.description, options: p.options, validation: p.validation })
       await load()
       setSaveState("saved")
       setLastSaved(new Date().toISOString())
@@ -142,7 +142,6 @@ export default function TemplateDetailPage() {
         const field = detail?.sections.flatMap((s) => s.fields).find((f) => f.id === fid)
         if (field) {
           await api.updateTemplateField(fid, {
-            key: field.key,
             label: field.label,
             field_type: field.field_type,
             is_required: field.is_required,
@@ -211,7 +210,7 @@ export default function TemplateDetailPage() {
             </button>
           </div>
         </header>
-        <main className="dash__main">
+        <main className="dash__main dash__main--wide">
           <div className="dash__ledger">
             <div className="dash__ledger-left"><span className="dash__ledger-kicker"><i /> Builder • template</span><h1 style={{ fontSize: 22 }}>{detail.template.title}</h1><p>Drag to reorder. Field config opens inline. Preview uses the same FormRenderer as the respondent.</p></div>
           </div>

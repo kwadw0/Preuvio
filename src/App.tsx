@@ -13,6 +13,7 @@ import FormsPage from "./pages/FormsPage"
 import FormDetailPage from "./pages/FormDetailPage"
 import FormFillPage from "./pages/FormFillPage"
 import SubmissionsPage, { SingleSubmissionPage } from "./pages/SubmissionsPage"
+import SubmissionsListPage from "./pages/SubmissionsListPage"
 import PartnersPage from "./pages/PartnersPage"
 import DashLayout from "./components/layout/DashLayout"
 import { ProtectedRoute, PublicRoute } from "./features/auth/ProtectedRoute"
@@ -44,6 +45,7 @@ function App() {
           <Route path="/forms" element={<FormsPage />} />
           <Route path="/forms/:id" element={<FormDetailPage />} />
           <Route path="/forms/:id/fill" element={<FormFillPage />} />
+          <Route path="/submissions" element={<SubmissionsListPage />} />
           <Route path="/forms/:formId/submissions" element={<SubmissionsPage />} />
           <Route path="/forms/:id/submissions" element={<SubmissionsPage />} />
           <Route path="/submissions/:id" element={<SingleSubmissionPage />} />

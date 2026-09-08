@@ -1,8 +1,16 @@
-import { useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import "./BuilderLayout.css"
 import type { RendererField, RendererSchema } from "../types"
 import { FormRenderer } from "./FormRenderer"
 import { FieldConfigPanel } from "./FieldConfigPanel"
+
+const LS_KEY = "preuvio:builder:leftW"
+const DEFAULT_W = 560
+const BUILDER_MIN = 420
+const BUILDER_MAX = 680
+const PREVIEW_MIN = 480
+const SPLITTER = 14
+const STEP = 24
 
 type Props = {
   schema: RendererSchema
@@ -30,6 +38,85 @@ export function BuilderLayout({ schema, onAddSection, onUpdateSection, onDeleteS
   const [editSectionTitle, setEditSectionTitle] = useState("")
 
   const allKeys = useMemo(() => schema.sections.flatMap((s) => s.fields.map((f) => f.key)), [schema])
+
+  // --- resizable splitter (clamped) ---
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [leftW, setLeftW] = useState<number>(() => {
+    if (typeof window === "undefined") return DEFAULT_W
+    const saved = Number(localStorage.getItem(LS_KEY))
+    return saved >= BUILDER_MIN && saved <= BUILDER_MAX ? saved : DEFAULT_W
+  })
+  const [dragging, setDragging] = useState(false)
+  const clamp = useCallback((desired: number, containerWidth: number) => {
+    const maxByPreview = containerWidth - PREVIEW_MIN - SPLITTER
+    const max = Math.min(BUILDER_MAX, maxByPreview)
+    const min = Math.min(BUILDER_MIN, max) // when container very narrow, prefer preview min
+    return Math.max(min, Math.min(max, Math.round(desired)))
+  }, [])
+
+  const pct = useMemo(() => {
+    // for aria-valuenow
+    const range = BUILDER_MAX - BUILDER_MIN
+    return Math.round(((leftW - BUILDER_MIN) / range) * 100)
+  }, [leftW])
+
+  useEffect(() => {
+    // keep persisted width valid on resize
+    const el = containerRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => {
+      const w = el.getBoundingClientRect().width
+      setLeftW((prev) => {
+        const c = clamp(prev, w)
+        if (c !== prev) localStorage.setItem(LS_KEY, String(c))
+        return c
+      })
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [clamp])
+
+  const handleSplitterPointerDown = useCallback((e: React.PointerEvent) => {
+    if (window.innerWidth <= 1100) return
+    const el = containerRef.current
+    if (!el) return
+    setDragging(true)
+    const pointerId = e.pointerId
+    ;(e.currentTarget as HTMLElement).setPointerCapture(pointerId)
+    const rect = el.getBoundingClientRect()
+    const onMove = (ev: PointerEvent) => {
+      const desired = ev.clientX - rect.left
+      const w = el.getBoundingClientRect().width
+      const c = clamp(desired, w)
+      setLeftW(c)
+    }
+    const onUp = (ev: PointerEvent) => {
+      const target = ev.target as HTMLElement | null
+      try { target?.releasePointerCapture?.(pointerId) } catch { /* ignore */ }
+      window.removeEventListener("pointermove", onMove)
+      window.removeEventListener("pointerup", onUp)
+      setDragging(false)
+      const current = (el as HTMLElement).getBoundingClientRect().width // re-read not needed
+      void current
+      // persist final
+      const finalW = clamp((ev.clientX - rect.left), el.getBoundingClientRect().width)
+      localStorage.setItem(LS_KEY, String(finalW))
+    }
+    window.addEventListener("pointermove", onMove)
+    window.addEventListener("pointerup", onUp, { once: true })
+  }, [clamp])
+
+  const nudge = useCallback((dir: -1 | 1, large = false) => {
+    const el = containerRef.current
+    if (!el) return
+    const delta = (large ? STEP * 1.8 : STEP) * dir
+    const w = el.getBoundingClientRect().width
+    setLeftW((prev) => {
+      const c = clamp(prev + delta, w)
+      localStorage.setItem(LS_KEY, String(c))
+      return c
+    })
+  }, [clamp])
 
   // autosave preview values — demo
   const [previewValues, setPreviewValues] = useState<Record<string, unknown>>({})
@@ -69,7 +156,7 @@ export function BuilderLayout({ schema, onAddSection, onUpdateSection, onDeleteS
   const showStructure = mobileTab === "structure" || typeof window === "undefined" || window.innerWidth > 1100
 
   return (
-    <div className="builder">
+    <div ref={containerRef} className={`builder ${dragging ? "builder--dragging" : ""}`} style={{ ["--left-w" as never]: `${leftW}px` } as React.CSSProperties}>
       {/* left */}
       <div className="builder__left" style={{ display: showStructure ? "grid" : "none" }}>
         <div className="builder__tabs">
@@ -284,6 +371,30 @@ export function BuilderLayout({ schema, onAddSection, onUpdateSection, onDeleteS
           </div>
         )}
       </div>
+
+      {/* splitter — desktop only, clamped 420↔680 vs preview min 480 */}
+      <div
+        className={`builder__splitter ${dragging ? "builder__splitter--dragging" : ""}`}
+        role="separator"
+        aria-orientation="vertical"
+        aria-label="Resize builder and preview"
+        aria-valuenow={pct}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        tabIndex={window.innerWidth > 1100 ? 0 : -1}
+        onPointerDown={handleSplitterPointerDown}
+        onDoubleClick={() => {
+          setLeftW(DEFAULT_W)
+          localStorage.setItem(LS_KEY, String(DEFAULT_W))
+        }}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowLeft") { e.preventDefault(); nudge(-1, e.shiftKey) }
+          else if (e.key === "ArrowRight") { e.preventDefault(); nudge(1, e.shiftKey) }
+          else if (e.key === "Home") { e.preventDefault(); const el = containerRef.current; if (el) { const w = el.getBoundingClientRect().width; const c = clamp(BUILDER_MIN, w); setLeftW(c); localStorage.setItem(LS_KEY, String(c)) } }
+          else if (e.key === "End") { e.preventDefault(); const el = containerRef.current; if (el) { const w = el.getBoundingClientRect().width; const c = clamp(BUILDER_MAX, w); setLeftW(c); localStorage.setItem(LS_KEY, String(c)) } }
+        }}
+        title="Drag to resize — double-click to reset. Limits keep both panes readable."
+      />
 
       {/* right preview — same FormRenderer as respondent */}
       <div className="builder__right" style={{ display: mobileTab === "preview" || window.innerWidth > 1100 ? "block" : "none" }}>

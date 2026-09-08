@@ -77,8 +77,8 @@ export default function FormDetailPage() {
     if(!id) return
     setSaveState("saving")
     try{
-      const p = payload as unknown as { key: string; label: string; field_type: string; is_required?: boolean; sort_order?: number; placeholder?: string; description?: string; options?: unknown; validation?: unknown }
-      await api.createFormField(id, { section_id: sectionId, key: p.key, label: p.label, field_type: p.field_type as never, is_required: p.is_required, sort_order: p.sort_order, placeholder: p.placeholder, description: p.description, options: p.options, validation: p.validation }); await load(); setSaveState("saved"); setLastSaved(new Date().toISOString())}catch(e){ setError(e instanceof ApiError?e.message:"Add field failed"); setSaveState("unsaved")}
+      const p = payload as unknown as { label: string; field_type: string; is_required?: boolean; sort_order?: number; placeholder?: string; description?: string; options?: unknown; validation?: unknown }
+      await api.createFormField(id, { section_id: sectionId, label: p.label, field_type: p.field_type as never, is_required: p.is_required, sort_order: p.sort_order, placeholder: p.placeholder, description: p.description, options: p.options, validation: p.validation }); await load(); setSaveState("saved"); setLastSaved(new Date().toISOString())}catch(e){ setError(e instanceof ApiError?e.message:"Add field failed"); setSaveState("unsaved")}
   }
   async function handleUpdateField(field: { id: string }, payload: Record<string, unknown>) {
     if(!id) return
@@ -96,7 +96,7 @@ export default function FormDetailPage() {
     setSaveState("saving")
     try{
       for(let i=0;i<orderedIds.length;i++){
-        const fid = orderedIds[i]; const f = detail?.sections.flatMap(s=>s.fields).find(x=>x.id===fid); if(f) await api.updateFormField(id, fid, { key: f.key, label: f.label, field_type: f.field_type, is_required: f.is_required, sort_order: i*10, placeholder: f.placeholder ?? undefined, description: f.description ?? undefined, options: f.options ?? undefined, validation: f.validation ?? undefined} as never)
+        const fid = orderedIds[i]; const f = detail?.sections.flatMap(s=>s.fields).find(x=>x.id===fid); if(f) await api.updateFormField(id, fid, { label: f.label, field_type: f.field_type, is_required: f.is_required, sort_order: i*10, placeholder: f.placeholder ?? undefined, description: f.description ?? undefined, options: f.options ?? undefined, validation: f.validation ?? undefined} as never)
       }
       await load(); setSaveState("saved"); setLastSaved(new Date().toISOString())
     }catch(e){ setError(e instanceof ApiError?e.message:"Reorder failed"); setSaveState("unsaved")}
@@ -110,7 +110,7 @@ export default function FormDetailPage() {
   return (
     <>
         <header className="dash__top"><span className="dash__crumb"><Link to="/forms" style={{color:"inherit"}}>Forms</Link><strong>{detail.form.title}</strong></span><div className="dash__top-actions"><span className={`pill ${status==="active"?"pill--approved":status==="draft"?"pill--pending":"pill--expired"}`}>{status}</span><Link className="btn btn--ghost" to={`/forms/${detail.form.id}/fill`}>Fill view →</Link><Link className="btn btn--ghost" to={`/forms/${detail.form.id}/submissions`}>Submissions</Link></div></header>
-        <main className="dash__main">
+        <main className="dash__main dash__main--wide">
           <div className="dash__ledger"><div className="dash__ledger-left"><span className="dash__ledger-kicker"><i/> Dossier • form</span><h1 style={{fontSize:22}}>{detail.form.title}</h1><p>Customize sections/fields. Reorder via drag. Preview is the same FormRenderer the partner sees.</p></div></div>
 
           <div className="dash__card" style={{ padding:14, display:"grid", gap:10 }}>

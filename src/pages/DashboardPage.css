@@ -131,6 +131,9 @@
   display: grid; gap: 24px;
   max-width: 1200px; width: 100%;
 }
+.dash__main--wide {
+  max-width: 1360px;
+}
 @media (max-width: 640px) { .dash__main { padding: 16px; gap: 16px; } }
 
 /* Ledger header — copper accent, not indigo */
