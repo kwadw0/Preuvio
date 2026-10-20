@@ -1,6 +1,8 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../features/auth/context"
+import * as partnersApi from "../features/partners/api"
+import { setPartnerCache } from "../features/partners/usePartnerProfile"
 import { validateLogin, type LoginErrors } from "../features/auth/validation"
 import { ApiError } from "../lib/api"
 import "./SignupPage.css"
@@ -33,6 +35,18 @@ function SigninPage() {
     setIsSubmitting(true)
     try {
       await login(payload)
+      // role_id in the JWT/profile is a UUID, so it can never identify a
+      // partner by name. Probe the partner-scoped endpoint instead:
+      // 200 => partner user, 403 => org member.
+      try {
+        const partner = await partnersApi.getMyPartner()
+        setPartnerCache(partner)
+        navigate("/assignments", { replace: true })
+        return
+      } catch {
+        // not a partner user — seed the guard so it does not probe again
+        setPartnerCache(null)
+      }
       navigate("/dashboard", { replace: true })
     } catch (err) {
       if (err instanceof ApiError) {

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import "./DashboardPage.css"
 import "./ProfilePage.css"
@@ -6,11 +6,27 @@ import { useOnboardingStatus } from "../features/org/useOnboardingStatus"
 import { humanizeEnum } from "../features/org/types"
 import { useUserProfile } from "../features/user/useUserProfile"
 import { formatMemberSince, getInitials } from "../features/user/types"
+import { ApiError } from "../lib/api"
+import * as orgApi from "../features/org/api"
 
 function ProfilePage() {
   const [mobileNav, setMobileNav] = useState(false)
-  const { isLoading: orgLoading, org, error: orgError, isOnboarded } = useOnboardingStatus()
+  const { isLoading: orgLoading, org, error: orgError, isOnboarded, refresh } = useOnboardingStatus() as { isLoading: boolean; org: import("../features/org/types").OrganizationResponseDto | null; error: string | null; isOnboarded: boolean; refresh?: () => void }
   const { isLoading: userLoading, user, isPlaceholder } = useUserProfile()
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editDesc, setEditDesc] = useState("")
+  const [editWebsite, setEditWebsite] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (org) {
+      setEditName(org.name ?? "")
+      setEditDesc(org.description ?? "")
+      setEditWebsite(org.website_url ?? "")
+    }
+  }, [org])
 
   const initials = user ? getInitials(user.first_name, user.last_name) : "—"
   const fullName = user ? `${user.first_name} ${user.last_name}` : "—"
@@ -171,6 +187,46 @@ function ProfilePage() {
                           </div>
                         )}
                       </div>
+                      {!editing ? (
+                        <button className="btn btn--ghost btn--sm" onClick={() => { setSaveError(null); setEditing(true) }}>Edit workspace</button>
+                      ) : (
+                        <form
+                          onSubmit={async (e) => {
+                            e.preventDefault()
+                            if (!org) return
+                            setSaving(true)
+                            setSaveError(null)
+                            try {
+                              const patch: Record<string, string> = {}
+                              if (editName.trim() && editName.trim() !== org.name) patch.name = editName.trim()
+                              if (editDesc.trim() !== (org.description ?? "")) patch.description = editDesc.trim()
+                              if (editWebsite.trim() !== (org.website_url ?? "")) patch.website_url = editWebsite.trim()
+                              if (Object.keys(patch).length === 0) {
+                                setEditing(false)
+                                return
+                              }
+                              await orgApi.updateOrganization(org.id, patch)
+                              setEditing(false)
+                              refresh?.()
+                            } catch (err) {
+                              setSaveError(err instanceof ApiError ? err.message : "Update failed")
+                            } finally {
+                              setSaving(false)
+                            }
+                          }}
+                          style={{ display: "grid", gap: 8, marginTop: 12 }}
+                        >
+                          <label className="field"><span>Name</span><input value={editName} onChange={(e) => setEditName(e.target.value)} style={{ minHeight: 40 }} /></label>
+                          <label className="field"><span>Description</span><input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} style={{ minHeight: 40 }} /></label>
+                          <label className="field"><span>Website</span><input value={editWebsite} onChange={(e) => setEditWebsite(e.target.value)} placeholder="https://…" style={{ minHeight: 40 }} /></label>
+                          {saveError && <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--danger)" }}>{saveError}</div>}
+                          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+                            <button type="button" className="btn btn--ghost btn--sm" onClick={() => setEditing(false)} disabled={saving}>Cancel</button>
+                            <button type="submit" className="btn btn--primary btn--sm" disabled={saving}>{saving ? "Saving…" : "Save changes"}</button>
+                          </div>
+                          <span className="mono-muted" style={{ fontSize: 11 }}>Partial update — only changed fields are sent.</span>
+                        </form>
+                      )}
                     </>
                   )}
                 </div>

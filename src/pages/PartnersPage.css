@@ -125,11 +125,29 @@
 @media (max-width: 700px) {
   .partner-modal__grid { grid-template-columns: 1fr; }
 }
+.partner-modal__grid > * {
+  min-width: 0;
+}
 .partner-modal__section {
   border: 1px solid var(--warm-gray);
   border-radius: 12px;
   overflow: hidden;
   background: var(--surface);
+}
+/* Flat sections — plain stacked blocks, no card chrome (used below the top dossier cards) */
+.partner-modal__section--flat {
+  border: none;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+}
+.partner-modal__section--flat > .partner-modal__section-head {
+  background: transparent;
+  border-bottom: none;
+  padding: 0 0 8px;
+}
+.partner-modal__section--flat > .partner-modal__section-body {
+  padding: 0;
 }
 .partner-modal__section-head {
   display: flex; align-items: center; justify-content: space-between;
@@ -147,6 +165,32 @@
   padding: 14px;
   display: grid;
   gap: 10px;
+  min-width: 0;
+}
+/* Vault totals bar — wraps on narrow cards instead of overflowing */
+.vault-total {
+  background: var(--forest);
+  color: white;
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--mono);
+  font-size: 11px;
+  min-width: 0;
+}
+.vault-total > span:last-child {
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.14);
+  padding: 4px 6px;
+  border-radius: 6px;
+  min-width: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .partner-modal__field {
   display: grid; gap: 4px;

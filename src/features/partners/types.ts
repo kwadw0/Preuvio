@@ -17,18 +17,33 @@ export type CreatePartnerDto = {
   phone?: string
 }
 
-export type UpdatePartnerDto = CreatePartnerDto & { id?: string }
+export type UpdatePartnerDto = Partial<CreatePartnerDto> & { id?: string; status?: "pending" | "active" | "inactive" | "suspended" }
+
+export type InvitationResponse = {
+  id: string
+  partner_id: string
+  email: string
+  role_id: string
+  status: string
+  created_at: string
+  expires_at: string
+}
+
+export type InvitePartnerUserDto = {
+  email: string
+  role_id: string
+}
 
 export const mockPartners: PartnerResponse[] = [
-  { id: "1", name: "Avenor Logistics", email: "ops@avenor-log.com", phone: "+1 415 555 0101", organization_id: "org_1", status: "approved", created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), updated_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() },
+  { id: "1", name: "Avenor Logistics", email: "ops@avenor-log.com", phone: "+1 415 555 0101", organization_id: "org_1", status: "active", created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), updated_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString() },
   { id: "2", name: "Northstar Supply", email: "compliance@northstar.supply", phone: "+1 415 555 0102", organization_id: "org_1", status: "submitted", created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), updated_at: new Date().toISOString() },
   { id: "3", name: "Quantum Coop", email: "legal@quantum.coop", phone: "+1 415 555 0103", organization_id: "org_1", status: "pending", created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), updated_at: new Date().toISOString() },
   { id: "4", name: "Floren & Co", email: "risk@floren.co", phone: "+1 415 555 0104", organization_id: "org_1", status: "expired", created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(), updated_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString() },
   { id: "5", name: "Sable Systems", email: "sec@sable.systems", phone: "+1 415 555 0105", organization_id: "org_1", status: "pending", created_at: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(), updated_at: new Date().toISOString() },
-  { id: "6", name: "Veridian Ltd", email: "vendor@veridian.ltd", phone: "+1 415 555 0106", organization_id: "org_1", status: "approved", created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), updated_at: new Date().toISOString() },
+  { id: "6", name: "Veridian Ltd", email: "vendor@veridian.ltd", phone: "+1 415 555 0106", organization_id: "org_1", status: "active", created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(), updated_at: new Date().toISOString() },
   { id: "7", name: "Cedar Atlas", email: "procure@cedaratlas.io", phone: "+1 415 555 0107", organization_id: "org_1", status: "pending", created_at: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(), updated_at: new Date().toISOString() },
   { id: "8", name: "Mirefield Group", email: "comply@mirefield.group", phone: "+1 415 555 0108", organization_id: "org_1", status: "submitted", created_at: new Date(Date.now() - 1000 * 60 * 60 * 10).toISOString(), updated_at: new Date().toISOString() },
-  { id: "9", name: "Aurelia Partners", email: "trust@aurelia.partners", phone: "+1 415 555 0109", organization_id: "org_1", status: "approved", created_at: new Date(Date.now() - 1000 * 60 * 60 * 30).toISOString(), updated_at: new Date().toISOString() },
+  { id: "9", name: "Aurelia Partners", email: "trust@aurelia.partners", phone: "+1 415 555 0109", organization_id: "org_1", status: "active", created_at: new Date(Date.now() - 1000 * 60 * 60 * 30).toISOString(), updated_at: new Date().toISOString() },
   { id: "10", name: "Halcyon Works", email: "legal@halcyon.works", phone: "+1 415 555 0110", organization_id: "org_1", status: "pending", created_at: new Date(Date.now() - 1000 * 60 * 60 * 15).toISOString(), updated_at: new Date().toISOString() },
   { id: "11", name: "Obsidian Collective", email: "ops@obsidian.co", phone: "+1 415 555 0111", organization_id: "org_1", status: "expired", created_at: new Date(Date.now() - 1000 * 60 * 60 * 96).toISOString(), updated_at: new Date().toISOString() },
   { id: "12", name: "Vela Logistics", email: "comply@vela.log", phone: "+1 415 555 0112", organization_id: "org_1", status: "submitted", created_at: new Date(Date.now() - 1000 * 60 * 60 * 18).toISOString(), updated_at: new Date().toISOString() },
@@ -77,7 +92,7 @@ export function enrichPartner(p: PartnerResponse) {
   }
   const idNum = parseInt(p.id.replace(/\D/g, "") || "0", 10)
   const docs = docsMap[p.id] ?? (idNum % 2 === 0 ? "SOC 2 • COI" : "W-9 • DPA")
-  const verification = p.status === "approved" ? 92 + (idNum % 7) : p.status === "submitted" ? 68 + (idNum % 12) : 34 + (idNum % 20)
+  const verification = p.status === "active" || (p as { status?: string }).status === "approved" ? 92 + (idNum % 7) : p.status === "submitted" ? 68 + (idNum % 12) : 34 + (idNum % 20)
   return { ...p, docs, verification, initials: getInitials(p.name) }
 }
 

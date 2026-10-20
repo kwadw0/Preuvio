@@ -1,16 +1,18 @@
 import { useCallback, useEffect, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import "./DashboardPage.css"
-import { ApiError } from "../lib/api"
+import { ApiError, getErrorCode } from "../lib/api"
 import * as api from "../features/forms/api"
 import type { FormDetailResponse, RendererSchema } from "../features/forms/types"
 import { toRendererSchemaFromForm } from "../features/forms/types"
 import { FormRenderer } from "../features/forms/components/FormRenderer"
 import { validateAll, validateField } from "../features/forms/validation"
 import type { RendererField } from "../features/forms/types"
+import { usePartnerProfile } from "../features/partners/usePartnerProfile"
 
 export default function FormFillPage() {
   const { id } = useParams<{ id: string }>()
+  const { isPartner } = usePartnerProfile()
   const [detail, setDetail] = useState<FormDetailResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -52,6 +54,15 @@ export default function FormFillPage() {
     }
   }
 
+  function submitErrorMessage(err: unknown): string {
+    const code = getErrorCode(err)
+    if (code === "ASSIGNMENT_REQUIRED") return "Not assigned to you — ask your org to assign this form before submitting."
+    if (code === "PARTNER_INACTIVE") return "This vendor account is inactive or suspended — submitting is disabled. Contact your org."
+    if (code === "FORM_NOT_ACTIVE") return "This form is not active — submissions are closed."
+    if (code === "ALREADY_SUBMITTED") return "Already submitted — resubmission is disabled for this form."
+    return err instanceof ApiError ? err.message : "Submit failed"
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!id || !schema) return
@@ -68,7 +79,7 @@ export default function FormFillPage() {
       const sub = await api.createSubmission(id, values)
       setSuccessId(sub.id)
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Submit failed")
+      setError(submitErrorMessage(err))
     } finally {
       setSubmitting(false)
     }
@@ -80,10 +91,11 @@ export default function FormFillPage() {
 
   const isArchived = detail.form.status === "archived"
   const isDraft = detail.form.status === "draft"
+  const allowResubmit = detail.form.allow_resubmit ?? false
 
   return (
     <>
-        <header className="dash__top"><span className="dash__crumb"><Link to="/forms" style={{ color: "inherit" }}>Forms</Link><strong>{detail.form.title}</strong></span><div className="dash__top-actions"><span className={`pill ${detail.form.status === "active" ? "pill--approved" : detail.form.status === "draft" ? "pill--pending" : "pill--expired"}`}>{detail.form.status}</span><Link className="btn btn--ghost" to={`/forms/${detail.form.id}`}>Edit dossier</Link><Link className="btn btn--ghost" to={`/forms/${detail.form.id}/submissions`}>Submissions</Link></div></header>
+        <header className="dash__top"><span className="dash__crumb"><Link to={isPartner ? "/assignments" : "/forms"} style={{ color: "inherit" }}>{isPartner ? "My work" : "Forms"}</Link><strong>{detail.form.title}</strong></span><div className="dash__top-actions"><span className={`pill ${detail.form.status === "active" ? "pill--approved" : detail.form.status === "draft" ? "pill--pending" : "pill--expired"}`}>{detail.form.status}</span>{isPartner ? <Link className="btn btn--ghost" to="/assignments">Back to queue</Link> : <><Link className="btn btn--ghost" to={`/forms/${detail.form.id}`}>Edit dossier</Link><Link className="btn btn--ghost" to={`/forms/${detail.form.id}/submissions`}>Submissions</Link></>}</div></header>
         <main className="dash__main">
           <div className="dash__ledger"><div className="dash__ledger-left"><span className="dash__ledger-kicker"><i /> Respondent • fill dossier</span><h1 style={{ fontSize: 22 }}>{detail.form.title}</h1><p>{detail.form.description ?? "Fill the dossier. Conditional fields animate in smoothly."}</p></div><div className="dash__ledger-actions"><button className={`btn btn--sm ${stepMode === "single" ? "btn--primary" : "btn--ghost"}`} onClick={() => setStepMode("single")}>Single page</button><button className={`btn btn--sm ${stepMode === "stepper" ? "btn--primary" : "btn--ghost"}`} onClick={() => setStepMode("stepper")}>Stepper</button></div></div>
 
@@ -96,7 +108,11 @@ export default function FormFillPage() {
               <strong style={{ fontFamily: "var(--display)", fontSize: 15 }}>Submitted — pending review</strong>
               <span style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--slate)" }}>ID {successId}</span>
               <Link className="btn btn--ghost" to={`/submissions/${successId}`}>View submission →</Link>
-              <button className="btn btn--ghost" onClick={() => { setSuccessId(null); setValues({}); setErrors({}) }}>Submit another</button>
+              {allowResubmit ? (
+                <button className="btn btn--ghost" onClick={() => { setSuccessId(null); setValues({}); setErrors({}) }}>Submit another</button>
+              ) : (
+                <span className="mono-muted" style={{ fontSize: 11 }}>Resubmission disabled for this form.</span>
+              )}
             </div>
           ) : (
             <form onSubmit={handleSubmit} noValidate style={{ display: "grid", gap: 16 }}>

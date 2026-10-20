@@ -16,6 +16,7 @@ export default function FormsPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [title, setTitle] = useState("")
   const [desc, setDesc] = useState("")
+  const [allowResubmit, setAllowResubmit] = useState(false)
   const [templateId, setTemplateId] = useState("")
   const [cloneMode, setCloneMode] = useState(true)
   const [mobileNav, setMobileNav] = useState(false)
@@ -63,9 +64,9 @@ export default function FormsPage() {
     try {
       if (cloneMode && templateId) {
         const form = await api.cloneTemplate(templateId, { title: title.trim() })
-        if (desc.trim()) {
+        if (desc.trim() || allowResubmit) {
           try {
-            await api.updateForm(form.id, { title: form.title, description: desc.trim(), status: form.status })
+            await api.updateForm(form.id, { description: desc.trim() || undefined, allow_resubmit: allowResubmit || undefined })
           } catch {
             // description patch is optional — clone already succeeded
           }
@@ -74,7 +75,7 @@ export default function FormsPage() {
         navigate(`/forms/${form.id}`)
       } else {
         // Scratch — never send template_id (POST /forms no longer accepts it)
-        const form = await api.createForm({ title: title.trim(), description: desc.trim() || undefined })
+        const form = await api.createForm({ title: title.trim(), description: desc.trim() || undefined, allow_resubmit: allowResubmit || undefined })
         navigate(`/forms/${form.id}`)
       }
     } catch (e) {
@@ -237,6 +238,10 @@ export default function FormsPage() {
 
               <label className="field"><span>Title *</span><input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={cloneMode ? "e.g. Vendor KYC — Acme" : "e.g. Custom KYC Request"} style={{ minHeight: 44 }} /></label>
               <label className="field"><span>Description</span><input value={desc} onChange={(e) => setDesc(e.target.value)} placeholder="Optional" style={{ minHeight: 44 }} /></label>
+              <label style={{ display: "flex", gap: 8, alignItems: "center", fontFamily: "var(--mono)", fontSize: 12, color: "var(--slate)" }}>
+                <input type="checkbox" checked={allowResubmit} onChange={(e) => setAllowResubmit(e.target.checked)} />
+                Allow resubmission (vendors may submit more than once)
+              </label>
 
               {cloneMode ? (
                 <label className="field"><span>Template to clone *</span>

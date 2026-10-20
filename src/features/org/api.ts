@@ -27,3 +27,41 @@ export function fetchMyOrganization() {
 export function extractOrg(dto: { data: OrganizationResponseDto } | OrganizationResponseDto): OrganizationResponseDto {
   return (dto as { data: OrganizationResponseDto }).data ?? (dto as OrganizationResponseDto)
 }
+
+export type OrgUpdateDto = Partial<{
+  name: string
+  description: string
+  industry: string
+  team_size: string
+  website_url: string
+  owner_role: string
+  primary_customer_type: "b2b" | "b2c" | "both"
+}>
+
+export function listOrganizations(page = 1, limit = 20) {
+  return apiAuth<{ data: OrganizationResponseDto[]; meta?: { page: number; limit: number; total: number; total_pages: number } } | OrganizationResponseDto[]>("/api/organizations", {
+    method: "GET",
+    params: { page, limit },
+  })
+}
+
+export function getOrganization(id: string) {
+  return apiAuth<{ data: OrganizationResponseDto } | OrganizationResponseDto>(`/api/organizations/${id}`, {
+    method: "GET",
+  })
+}
+
+export function updateOrganization(id: string, dto: OrgUpdateDto) {
+  const payload: Record<string, unknown> = {}
+  for (const [k, v] of Object.entries(dto)) {
+    if (typeof v === "string" ? v.trim() !== "" : v !== undefined) payload[k] = typeof v === "string" ? v.trim() : v
+  }
+  return apiAuth<{ data: OrganizationResponseDto } | OrganizationResponseDto>(`/api/organizations/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteOrganization(id: string) {
+  return apiAuth(`/api/organizations/${id}`, { method: "DELETE" })
+}

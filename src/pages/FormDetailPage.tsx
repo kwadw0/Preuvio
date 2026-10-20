@@ -18,6 +18,7 @@ export default function FormDetailPage() {
   const [title, setTitle] = useState("")
   const [desc, setDesc] = useState("")
   const [status, setStatus] = useState<"draft" | "active" | "archived">("draft")
+  const [allowResubmit, setAllowResubmit] = useState(false)
 
   const load = useCallback(async () => {
     if (!id) return
@@ -28,6 +29,7 @@ export default function FormDetailPage() {
       setTitle(d.form.title)
       setDesc(d.form.description ?? "")
       setStatus(d.form.status as never)
+      setAllowResubmit(d.form.allow_resubmit ?? false)
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Load failed")
     } finally {
@@ -42,7 +44,7 @@ export default function FormDetailPage() {
     if (!id) return
     setSaveState("saving")
     try {
-      await api.updateForm(id, { title: title.trim(), description: desc.trim() || undefined, status })
+      await api.updateForm(id, { title: title.trim(), description: desc.trim() || undefined, status, allow_resubmit: allowResubmit })
       await load()
       setSaveState("saved")
       setLastSaved(new Date().toISOString())
@@ -119,6 +121,10 @@ export default function FormDetailPage() {
               <label className="field"><span>Status</span><select value={status} onChange={e=>setStatus(e.target.value as never)} style={{minHeight:44}} disabled={archived}><option value="draft">draft — editing</option><option value="active">active — submittable</option><option value="archived">archived — read-only</option></select></label>
             </div>
             <label className="field"><span>Description</span><input value={desc} onChange={e=>setDesc(e.target.value)} placeholder="Optional" style={{minHeight:44}} disabled={archived}/></label>
+            <label style={{ display: "flex", gap: 8, alignItems: "center", fontFamily: "var(--mono)", fontSize: 12, color: "var(--slate)" }}>
+              <input type="checkbox" checked={allowResubmit} onChange={e=>setAllowResubmit(e.target.checked)} disabled={archived} />
+              Allow resubmission (second submit allowed; otherwise 409)
+            </label>
             {archived && <div style={{ fontFamily:"var(--mono)", fontSize:12, color:"var(--danger)", background:"#fdf0ef", border:"1px solid #e8c4c3", padding:8, borderRadius:8}}>Archived — read-only. Change status to draft to edit.</div>}
             <div style={{ display:"flex", gap:8, justifyContent:"flex-end"}}>
               <button className="btn btn--ghost" onClick={()=>navigate("/forms")}>Back to forms</button>
@@ -126,6 +132,11 @@ export default function FormDetailPage() {
               <button className="btn btn--primary" onClick={saveMeta} disabled={archived || !title.trim()}>Save meta</button>
             </div>
             {error ? <div style={{ fontFamily:"var(--mono)", fontSize:12, color:"var(--danger)"}}>{error}</div>:null}
+          </div>
+
+          <div className="dash__card" style={{ padding:14, display:"flex", justifyContent:"space-between", alignItems:"center", gap:10 }}>
+            <span className="mono-muted" style={{ fontSize:12 }}>Assign this form from a partner dossier — open Partners, pick a vendor, Assign form.</span>
+            <Link className="btn btn--primary btn--sm" to="/partners">Assign from Partners →</Link>
           </div>
 
           {archived ? (

@@ -7,12 +7,18 @@ import OrgPage from "./pages/OrgPage"
 import ProfilePage from "./pages/ProfilePage"
 import OnboardingPage from "./pages/OnboardingPage"
 import ForgotPasswordPage from "./pages/ForgotPasswordPage"
+import ResetPasswordPage from "./pages/ResetPasswordPage"
+import VerifyEmailPage from "./pages/VerifyEmailPage"
+import InviteAcceptPage from "./pages/InviteAcceptPage"
+import MyAssignmentsPage from "./pages/MyAssignmentsPage"
+import VaultPage from "./pages/VaultPage"
 import TemplatesPage from "./pages/TemplatesPage"
 import TemplateDetailPage from "./pages/TemplateDetailPage"
 import FormsPage from "./pages/FormsPage"
 import FormDetailPage from "./pages/FormDetailPage"
 import FormFillPage from "./pages/FormFillPage"
-import SubmissionsPage, { SingleSubmissionPage } from "./pages/SubmissionsPage"
+import SubmissionsPage from "./pages/SubmissionsPage"
+import SubmissionDetailPage from "./pages/SubmissionDetailPage"
 import SubmissionsListPage from "./pages/SubmissionsListPage"
 import PartnersPage from "./pages/PartnersPage"
 import DashLayout from "./components/layout/DashLayout"
@@ -24,6 +30,9 @@ function App() {
       {/* Public */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+      <Route path="/invite/accept" element={<InviteAcceptPage />} />
 
       {/* Auth pages — redirect to dashboard if already authenticated */}
       <Route element={<PublicRoute />}>
@@ -38,6 +47,8 @@ function App() {
         <Route path="/org" element={<OrgPage />} />
         <Route element={<DashLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          {/* Partner work queue — partner users get their dashboard here. */}
+          <Route path="/assignments" element={<MyAssignmentsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/partners" element={<PartnersPage />} />
           <Route path="/templates" element={<TemplatesPage />} />
@@ -48,7 +59,8 @@ function App() {
           <Route path="/submissions" element={<SubmissionsListPage />} />
           <Route path="/forms/:formId/submissions" element={<SubmissionsPage />} />
           <Route path="/forms/:id/submissions" element={<SubmissionsPage />} />
-          <Route path="/submissions/:id" element={<SingleSubmissionPage />} />
+          <Route path="/submissions/:id" element={<SubmissionDetailPage />} />
+          <Route path="/vault" element={<VaultPage />} />
         </Route>
       </Route>
     </Routes>

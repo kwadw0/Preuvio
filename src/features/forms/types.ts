@@ -90,6 +90,7 @@ export type FormResponse = {
   organization_id: string
   status: FormStatus
   template_id: string | null
+  allow_resubmit: boolean
   created_at: string
   updated_at: string
 }
@@ -160,8 +161,8 @@ export type RendererSchema = {
 // --- DTOs ---
 export type CreateTemplateDto = { title: string; description?: string; category?: string }
 export type UpdateTemplateDto = CreateTemplateDto & { is_active?: boolean }
-export type CreateFormDto = { title: string; description?: string }
-export type UpdateFormDto = { title: string; description?: string; status?: FormStatus }
+export type CreateFormDto = { title: string; description?: string; allow_resubmit?: boolean }
+export type UpdateFormDto = { title?: string; description?: string; status?: FormStatus; allow_resubmit?: boolean }
 export type CreateSectionDto = { title: string; description?: string; sort_order?: number }
 export type UpdateSectionDto = CreateSectionDto
 export type CloneTemplateDto = { title: string }

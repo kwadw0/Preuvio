@@ -1,12 +1,15 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "./DashboardPage.css"
 import { config } from "../lib/config"
 import { useAuth } from "../features/auth/context"
 import { setOnboardedCache } from "../features/org/useOnboardingStatus"
+import { ApiError } from "../lib/api"
+import * as partnersApi from "../features/partners/api"
+import { enrichPartner, formatRelative } from "../features/partners/types"
 
 // Types aligned with api.ts + landing mock
-type PartnerStatus = "pending" | "submitted" | "approved" | "expired"
+type PartnerStatus = "pending" | "submitted" | "approved" | "expired" | "active" | "inactive" | "suspended"
 type PartnerRow = {
   id: string
   name: string
@@ -24,15 +27,6 @@ type FormItem = {
   partners: number
   docs: string[]
 }
-
-const initialPartners: PartnerRow[] = [
-  { id: "1", name: "Avenor Logistics", initials: "AV", docs: "SOC 2 • Insurance", status: "approved", updated: "2h ago" },
-  { id: "2", name: "Northstar Supply", initials: "NS", docs: "NDA • ISO 27001", status: "submitted", updated: "Needs review" },
-  { id: "3", name: "Quantum Coop", initials: "QC", docs: "W-9 • COI", status: "pending", updated: "Reminded" },
-  { id: "4", name: "Floren & Co", initials: "FL", docs: "MSA • DPA", status: "expired", updated: "Overdue 3d" },
-  { id: "5", name: "Sable Systems", initials: "SA", docs: "SOC 2 • DPA", status: "pending", updated: "1d ago" },
-  { id: "6", name: "Veridian Ltd", initials: "VE", docs: "COI • W-9", status: "approved", updated: "5h ago" },
-]
 
 const initialForms: FormItem[] = [
   { id: "f1", title: "Vendor compliance 2026", visibility: "private", status: "active", updated: "2h ago", partners: 24, docs: ["SOC 2", "Insurance", "MSA"] },
@@ -56,13 +50,46 @@ function DashboardPage() {
   const [activeTab, setActiveTab] = useState<"all" | "forms" | "templates" | "public">("all")
   const [filter, setFilter] = useState<PartnerStatus | "all">("all")
   const [search, setSearch] = useState("")
-  const [partners, setPartners] = useState<PartnerRow[]>(initialPartners)
+  const [partners, setPartners] = useState<PartnerRow[]>([])
+  const [partnersLoading, setPartnersLoading] = useState(true)
+  const [partnersError, setPartnersError] = useState<string | null>(null)
   const [forms, setForms] = useState<FormItem[]>(initialForms)
   const [showCreate, setShowCreate] = useState<null | "form" | "template">(null)
   const [newTitle, setNewTitle] = useState("")
   const [newVis, setNewVis] = useState<"private" | "public">("private")
   const [newDocs, setNewDocs] = useState<string[]>(["SOC 2"])
   const [docInput, setDocInput] = useState("")
+
+  // Partners preview — live API, top 6 recent (source of truth is /partners)
+  useEffect(() => {
+    let alive = true
+    setPartnersLoading(true)
+    partnersApi.listPartners()
+      .then((data) => {
+        if (!alive) return
+        const rows: PartnerRow[] = (Array.isArray(data) ? data : [])
+          .map((p) => enrichPartner(p))
+          .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+          .slice(0, 6)
+          .map((p) => ({
+            id: p.id,
+            name: p.name,
+            initials: p.initials,
+            docs: p.email ?? p.docs,
+            status: (p.status ?? "pending") as PartnerStatus,
+            updated: formatRelative(p.updated_at),
+          }))
+        setPartners(rows)
+        setPartnersError(null)
+      })
+      .catch((e) => {
+        if (!alive) return
+        setPartners([])
+        setPartnersError(e instanceof ApiError ? e.message : "Failed to load partners")
+      })
+      .finally(() => alive && setPartnersLoading(false))
+    return () => { alive = false }
+  }, [])
 
   const filteredPartners = useMemo(() => {
     return partners.filter((p) => {
@@ -98,10 +125,6 @@ function DashboardPage() {
     setNewTitle("")
     setNewDocs(["SOC 2"])
     setShowCreate(null)
-  }
-
-  function handleStatusChange(id: string, next: PartnerStatus) {
-    setPartners((prev) => prev.map((p) => (p.id === id ? { ...p, status: next, updated: "now" } : p)))
   }
 
   function handleSignOut() {
@@ -244,7 +267,7 @@ function DashboardPage() {
               <h2 id="partners-title">Partners & requests <em>{filteredPartners.length} of {partners.length}</em></h2>
               <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                 <div className="filter-pills">
-                  {(["all","pending","submitted","approved","expired"] as const).map((s) => (
+                  {(["all","pending","submitted","active","approved","expired"] as const).map((s) => (
                     <button key={s} className={filter===s?"is-active":""} onClick={()=>setFilter(s as any)}>{s === "all" ? "All" : s[0].toUpperCase()+s.slice(1)}</button>
                   ))}
                 </div>
@@ -274,29 +297,23 @@ function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredPartners.map((p) => (
+                  {partnersLoading ? (
+                    <tr><td colSpan={5} style={{ textAlign:"center", padding:24, color:"var(--muted)", fontFamily:"var(--mono)", fontSize:12}}>Loading partners…</td></tr>
+                  ) : partnersError ? (
+                    <tr><td colSpan={5} style={{ textAlign:"center", padding:24, color:"var(--danger)", fontFamily:"var(--mono)", fontSize:12}}>{partnersError} — <Link to="/partners" style={{ textDecoration:"underline" }}>open directory →</Link></td></tr>
+                  ) : filteredPartners.map((p) => (
                     <tr key={p.id}>
                       <td><span className="partner"><span className="partner__avatar">{p.initials}</span>{p.name}</span></td>
                       <td><span className="mono-muted">{p.docs}</span></td>
                       <td><span className={`pill pill--${p.status}`}>{p.status[0].toUpperCase()+p.status.slice(1)}</span></td>
                       <td><span className="mono-muted">{p.updated}</span></td>
                       <td style={{ textAlign:"right"}}>
-                        <select
-                          aria-label={`Change status for ${p.name}`}
-                          value={p.status}
-                          onChange={(e)=>handleStatusChange(p.id, e.target.value as PartnerStatus)}
-                          style={{ padding:"6px 8px", borderRadius:8, border:"1px solid var(--line)", fontSize:12, background:"white"}}
-                        >
-                          <option value="pending">Pending</option>
-                          <option value="submitted">Submitted</option>
-                          <option value="approved">Approved</option>
-                          <option value="expired">Expired</option>
-                        </select>
+                        <Link to="/partners" className="btn btn--ghost btn--sm">Manage →</Link>
                       </td>
                     </tr>
                   ))}
-                  {filteredPartners.length===0 && (
-                    <tr><td colSpan={5} style={{ textAlign:"center", padding:24, color:"var(--muted)"}}>No partners match your filter.</td></tr>
+                  {!partnersLoading && !partnersError && filteredPartners.length===0 && (
+                    <tr><td colSpan={5} style={{ textAlign:"center", padding:24, color:"var(--muted)"}}>{partners.length===0 ? "No partners yet — add one from the directory." : "No partners match your filter."}</td></tr>
                   )}
                 </tbody>
               </table>
@@ -315,11 +332,8 @@ function DashboardPage() {
                   <span><strong style={{color:"var(--ink)"}}>Retention & expiry</strong><br/><span style={{fontFamily:"var(--mono)", fontSize:11}}>Auto-expire & request re-upload</span></span>
                   <span className="pill pill--approved">Active</span>
                 </div>
-                <div style={{ background:"var(--ink)", color:"white", borderRadius:10, padding:12, display:"flex", justifyContent:"space-between", alignItems:"center", flexWrap:"wrap", gap:10}}>
-                  <span style={{ fontSize:13, fontWeight:600}}>External API</span>
-                  <code style={{ background:"rgba(255,255,255,.12)", border:"1px solid rgba(255,255,255,.18)", padding:"6px 8px", borderRadius:8, fontSize:11}}>{config.apiBaseUrl}/compliance/proof</code>
-                </div>
-                <p style={{ fontSize:12, margin:0}}>Every submission keeps version, signer, timestamp. Export a ZIP with one click.</p>
+                <p style={{ fontSize:12, margin:0}}>Every submission keeps signer and timestamp. Open the vault to review and export proof.</p>
+                <Link to="/vault" className="btn btn--primary btn--sm" style={{ justifyContent:"center"}}>Open the vault →</Link>
               </div>
             </section>
 

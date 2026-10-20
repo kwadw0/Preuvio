@@ -174,7 +174,22 @@ export function apiAuth<T>(path: string, opts: Omit<ApiOptions, "withAuth"> = {}
 }
 
 // Example domain types (aligned with landing copy)
-export type PartnerStatus = "pending" | "submitted" | "approved" | "expired"
+export type PartnerStatus = "pending" | "submitted" | "approved" | "expired" | "active" | "inactive" | "suspended"
+
+export function getErrorCode(err: unknown): string {
+  if (err instanceof ApiError) {
+    const p = err.payload as { code?: unknown; error?: unknown } | null
+    if (p && typeof p === "object") {
+      if (typeof p.code === "string" && p.code.trim()) return p.code.trim().toUpperCase()
+      if (typeof p.error === "string" && p.error.trim()) return p.error.trim().toUpperCase()
+    }
+    const msg = (err.message ?? "").toUpperCase()
+    for (const code of ["ASSIGNMENT_REQUIRED", "ALREADY_SUBMITTED", "PARTNER_INACTIVE", "FORM_NOT_ACTIVE"]) {
+      if (msg.includes(code)) return code
+    }
+  }
+  return ""
+}
 export type ComplianceDocument = {
   id: string
   name: string
